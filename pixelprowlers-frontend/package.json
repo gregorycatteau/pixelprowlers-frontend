@@ -1,5 +1,5 @@
 {
-  "name": "nuxt-app",
+  "name": "pixelprowlers-frontend",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,13 +11,20 @@
     "preview:test": "NODE_ENV=test nuxt preview",
     "preview:prod": "NODE_ENV=production nuxt preview",
     "generate": "nuxt generate",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "test:ui": "vitest --ui",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@hypernym/nuxt-gsap": "^2.4.3",
     "@nuxt/eslint": "^1.4.1",
     "@tailwindcss/vite": "^4.1.8",
+    "@vueuse/core": "^13.3.0",
+    "@vueuse/nuxt": "^13.3.0",
     "eslint": "^9.28.0",
-    "nuxt": "^3.17.5",
+    "gsap": "^3.13.0",
+    "nuxt": "3.17.0",
     "tailwindcss": "^4.1.8",
     "vue": "^3.5.16",
     "vue-router": "^4.5.1"

@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+/* 🎨 Couleurs ajustées avec meilleur contraste (adapté malvoyants) */
+@theme {
+  --color-primary: oklch(0.4 0.15 250); /* Bleu foncé élégant */
+  --color-secondary: oklch(0.98 0.01 90); /* Presque blanc neutre */
+  --color-dark: oklch(0.15 0.01 260); /* Gris-noir doux mais très lisible */
+  --color-accent: oklch(0.55 0.2 200); /* Bleu vif mais lisible */
+  --color-alert: oklch(
+    0.75 0.25 30
+  ); /* Rouge/orangé alerte avec bon contraste */
+}
+
+/* 🖋️ Typographies inchangées */
+@theme {
+  --font-sans: "Work Sans", sans-serif;
+  --font-display: "IBM Plex Mono", monospace;
+}
+html, body, #__nuxt, #__layout {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+/* 🧱 Base avec contraste renforcé */
+@layer base {
+  body {
+    @apply bg-secondary text-dark font-sans antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display text-dark;
+  }
+
+  a {
+    @apply text-accent hover:underline focus:outline-none focus:ring-2 focus:ring-accent;
+  }
+}
+
+/* 🧩 Composants avec meilleures couleurs */
+@layer components {
+  .btn-primary {
+    @apply bg-accent text-white px-6 py-2 rounded-xl font-semibold hover:bg-accent/80 focus:ring-2 focus:ring-accent transition;
+  }
+
+  .card {
+    @apply bg-white shadow-md rounded-xl p-6 text-dark;
+  }
+
+  .hero-title {
+    @apply text-primary text-5xl font-bold tracking-wide;
+  }
+
+  .hero-subtitle {
+    @apply text-secondary text-xl font-light;
+  }
+}
+
+/* 🛠️ Utilitaire conservé */
+@layer utilities {
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+}

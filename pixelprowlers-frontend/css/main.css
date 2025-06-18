@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply bg-secondary text-dark font-sans antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display text-dark;
+  }
+
+  a {
+    @apply text-accent hover:underline;
+  }
+}
+
+@layer components {
+  .hero-section {
+    @apply text-dark bg-green-200 px-6 py-24 sm:px-10 lg:py-36;
+  }
+
+  .hero-content {
+    @apply max-w-4xl mx-auto text-center lg:text-left space-y-8;
+  }
+
+  .hero-title {
+    @apply text-4xl sm:text-5xl lg:text-6xl font-display font-bold leading-tight tracking-tight;
+  }
+
+  .hero-text {
+    @apply text-lg sm:text-xl font-sans text-dark/80 max-w-2xl mx-auto lg:mx-0;
+  }
+
+  .hero-button {
+    @apply inline-block mt-6 bg-accent text-white text-base font-semibold px-6 py-3 rounded-xl shadow-md hover:bg-accent/90 transition duration-300 ease-in-out;
+  }
+
+  @screen sm {
+    .hero-title {
+      @apply text-5xl;
+    }
+  }
+
+  @screen lg {
+    .hero-section {
+      @apply py-36;
+    }
+
+    .hero-content {
+      @apply text-left;
+    }
+
+    .hero-text {
+      @apply text-xl;
+    }
+  }
+}
