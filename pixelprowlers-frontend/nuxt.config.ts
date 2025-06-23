@@ -29,4 +29,8 @@ export default defineNuxtConfig({
       siteName: process.env.NUXT_PUBLIC_SITE_NAME || 'Pixel Prowlers (Dev)',
     },
   },
+  routeRules: {
+    '/blog/**': { ssr: true },
+  }
+  
 });

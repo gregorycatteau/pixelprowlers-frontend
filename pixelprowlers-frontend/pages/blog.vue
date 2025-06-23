@@ -9,16 +9,38 @@
         :categories="categories"
         class="mb-8"
       />
-      <div
-        ref="articlesRef"
-        class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
-      >
-        <ArticleCard
-          v-for="article in filteredArticles"
-          :key="article.id"
-          :article="article"
-        />
-      </div>
+      <div v-if="pending" class="text-center py-6">Chargement...</div>
+      <template v-else>
+        <div
+          v-if="paginatedArticles.length"
+          ref="articlesRef"
+          class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
+        >
+          <ArticleCard
+            v-for="article in paginatedArticles"
+            :key="article.id"
+            :article="formatArticle(article)"
+          />
+        </div>
+        <p v-else class="text-center py-6">Aucun article disponible.</p>
+        <nav
+          v-if="totalPages > 1"
+          class="flex justify-center mt-8 space-x-2"
+        >
+          <button
+            v-for="page in totalPages"
+            :key="page"
+            @click="currentPage = page"
+            class="px-3 py-1 rounded"
+            :class="{
+              'bg-accent text-white': currentPage === page,
+              'bg-dark text-secondary': currentPage !== page,
+            }"
+          >
+            {{ page }}
+          </button>
+        </nav>
+      </template>
     </div>
   </div>
 </template>
@@ -29,70 +51,58 @@ import gsap from 'gsap'
 import BlogHero from '@/components/blog/BlogHero.vue'
 import BlogFilters from '@/components/blog/BlogFilters.vue'
 import ArticleCard from '@/components/blog/ArticleCard.vue'
-
-interface Article {
-  id: number
-  slug: string // Optional for filtering purposes
-  title: string
-  summary: string
-  category: string
-  date: string
-  image: string
-}
-
-const articlesMock: Article[] = [
-  {
-    id: 1,
-    slug: 'premiers-pas-avec-nuxt-3',
-    title: 'Premiers pas avec Nuxt 3',
-    summary: "Découvrez comment démarrer un projet Nuxt 3 et pourquoi l'utiliser.",
-    category: 'techniques',
-    date: '2024-05-05',
-    image: 'https://placehold.co/600x400',
-  },
-  {
-    id: 2,
-    slug: 'partenariat-associatif-en-2025',
-    title: 'Partenariat associatif en 2025',
-    summary: 'Retour sur nos collaborations et ce que cela apporte à la communauté.',
-    category: 'partenariats',
-    date: '2024-05-12',
-    image: 'https://placehold.co/600x400',
-  },
-  {
-    id: 3,
-    slug: 'reflexions-societales',
-    title: 'Réflexions sociétales',
-    summary: 'Comment le numérique peut servir un futur plus solidaire et durable.',
-    category: 'sociétales',
-    date: '2024-05-19',
-    image: 'https://placehold.co/600x400',
-  },
-]
+import {
+  getArticles,
+  getCategories,
+  type Article,
+  type Category,
+} from '@/composables/useArticles'
 
 const keyword = ref('')
 const selectedCategories = ref<string[]>([])
 const dateOrder = ref<'recent' | 'old'>('recent')
 
-const categories = Array.from(new Set(articlesMock.map((a) => a.category)))
+const { data: articles, pending } = await useAsyncData<Article[]>(getArticles)
+const { data: catData } = await useAsyncData<Category[]>(getCategories)
+
+const categories = computed(() => catData.value?.map((c) => c.name) ?? [])
+
+const currentPage = ref(1)
+
+const formatArticle = (a: Article) => ({
+  ...a,
+  date: a.created_at,
+  image: a.image || 'https://placehold.co/600x400',
+  category: typeof a.category === 'string' ? { name: a.category, slug: '' } : a.category,
+})
 
 const filteredArticles = computed(() => {
   const kw = keyword.value.toLowerCase()
-  let list = articlesMock.filter((a) =>
-    a.title.toLowerCase().includes(kw)
-  )
+  let list = (articles.value ?? [])
+    .filter((a) => a.title.toLowerCase().includes(kw))
   if (selectedCategories.value.length) {
     list = list.filter((a) =>
-      selectedCategories.value.includes(a.category)
+      selectedCategories.value.includes(
+        typeof a.category === 'string' ? a.category : a.category.name
+      )
     )
   }
   list = list.sort((a, b) => {
     return dateOrder.value === 'recent'
-      ? Number(new Date(b.date)) - Number(new Date(a.date))
-      : Number(new Date(a.date)) - Number(new Date(b.date))
+      ? Number(new Date(b.created_at)) - Number(new Date(a.created_at))
+      : Number(new Date(a.created_at)) - Number(new Date(b.created_at))
   })
   return list
 })
+
+const paginatedArticles = computed(() => {
+  const start = (currentPage.value - 1) * 10
+  return filteredArticles.value.slice(start, start + 10)
+})
+
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(filteredArticles.value.length / 10))
+)
 
 const articlesRef = ref<HTMLElement | null>(null)
 

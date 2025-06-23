@@ -1,7 +1,12 @@
 <template>
-  <article class="article-wrapper">
+  <div v-if="pending" class="text-center py-6">Chargement...</div>
+  <article v-else-if="article" class="article-wrapper">
     <section class="cover-image" ref="coverRef">
-      <img :src="article?.cover" alt="Image de couverture" class="cover-img" />
+      <img
+        :src="article.image || 'https://placehold.co/1200x600'"
+        alt="Image de couverture"
+        class="cover-img"
+      />
     </section>
 
     <section class="body-section">
@@ -9,59 +14,64 @@
         &larr; Tous les articles
       </NuxtLink>
       <h1 ref="titleRef" class="article-title">
-        {{ article?.title }}
+        {{ article.title }}
       </h1>
-      <p class="meta" v-if="article">
-        {{ article.date }} &#8226; {{ article.category }}
+      <p class="meta">
+        {{ formatDate(article.created_at) }} • {{ article.category.name }}
       </p>
-      <p class="meta" v-else>Chargement...</p>
       <div
         ref="contentRef"
         class="article-content"
-        v-if="article"
         v-html="article.content"
       />
     </section>
   </article>
+  <p v-else class="text-center py-6 text-red-400">Article introuvable</p>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watchEffect } from 'vue'
+import { useRoute } from '#imports'
+import { ref, onMounted } from 'vue'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { useRoute, useAsyncData, definePageMeta } from '#imports'
-import { useArticle, type Article } from '~/composables/useArticles'
 
-// 🔌 Enregistrement du plugin ScrollTrigger
 gsap.registerPlugin(ScrollTrigger)
+
+interface Article {
+  id: number
+  title: string
+  slug: string
+  summary: string
+  content: string
+  created_at: string
+  image?: string
+  category: {
+    id: number
+    name: string
+    slug: string
+  }
+}
 
 const route = useRoute()
 const slug = route.params.slug as string
 
-const { data: article } = useAsyncData<Article>(
-  `article-${slug}`,
-  () => useArticle(slug)
+const { data: article, pending } = await useFetch<Article>(
+  `/blog/articles/${slug}/`,
+  {
+    baseURL: useRuntimeConfig().public.apiBaseUrl,
+    key: `article-${slug}`,
+  }
 )
 
-// 🧠 Définition du titre par défaut
-definePageMeta({
-  title: 'Article en cours de chargement...'
-})
+function formatDate(date: string) {
+  return new Date(date).toLocaleDateString()
+}
 
-// 🧠 Mise à jour dynamique du titre une fois les données chargées
-watchEffect(() => {
-  if (article.value?.title) {
-    document.title = article.value.title
-  }
-})
-
-// 🎯 Refs DOM
 const titleRef = ref<HTMLElement | null>(null)
 const coverRef = ref<HTMLElement | null>(null)
 const contentRef = ref<HTMLElement | null>(null)
 const backBtnRef = ref<HTMLElement | null>(null)
 
-// 🎬 Animation GSAP (uniquement côté client)
 onMounted(() => {
   if (!process.client) return
 
@@ -106,7 +116,7 @@ onMounted(() => {
         gsap.to(backBtnRef.value!, { scale: 1, duration: 0.2 })
       })
     }
-  }, coverRef) // Contexte localisé
+  }, coverRef)
 
   return () => ctx.revert()
 })
@@ -151,3 +161,4 @@ onMounted(() => {
   @apply text-accent mb-6 inline-block transition-transform;
 }
 </style>
+
