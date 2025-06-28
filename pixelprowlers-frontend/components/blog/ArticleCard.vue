@@ -1,86 +1,76 @@
 <template>
-  <div v-if="pending" class="text-center py-6">Chargement...</div>
-  <article v-else class="article-wrapper">
-    <section class="cover-image">
+  <article ref="cardRef" class="article-card">
+    <div class="img-wrapper overflow-hidden rounded-xl">
       <img
-        :src="article.image || 'https://placehold.co/1200x600'"
+        :src="article.image || 'https://placehold.co/600x400'"
         :alt="article.title"
-        class="cover-img"
+        class="img w-full h-48 object-cover"
       />
-    </section>
-
-    <section class="body-section">
-      <NuxtLink to="/blog" class="back-btn">
-        &larr; Tous les articles
+    </div>
+    <div class="mt-4">
+      <h3 class="title text-xl font-semibold mb-2">{{ article.title }}</h3>
+      <p class="summary text-sm mb-3">{{ article.summary }}</p>
+      <div class="flex justify-between items-center text-xs mb-4">
+        <span v-if="article.category" class="badge bg-accent text-white px-2 py-1 rounded">
+          {{ article.category.name }}
+        </span>
+        <span v-else class="badge bg-gray-300 text-gray-700 px-2 py-1 rounded">
+          Sans catégorie
+        </span>
+        <span class="date text-gray-400">{{ formatDate(article.created_at) }}</span>
+      </div>
+      <NuxtLink :to="`/blog/${article.slug}`" class="btn-primary read">
+        Lire l'article
       </NuxtLink>
-      <h1 class="article-title">{{ article.title }}</h1>
-      <p class="meta">
-        {{ new Date(article.created_at).toLocaleDateString() }}
-        • {{ article.category.name }}
-      </p>
-      <div class="article-content" v-html="article.content" />
-    </section>
+    </div>
   </article>
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
-import { ref, watch, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
+import gsap from 'gsap'
 
-const route = useRoute()
-const slug = ref(route.params.slug as string)
-const article = ref<any>({})
-const pending = ref(true)
-
-async function fetchArticle(slugValue: string) {
-  pending.value = true
-  try {
-    const { data } = await useFetch(`/api/blog/articles/${slugValue}`, {
-      baseURL: useRuntimeConfig().public.apiBaseUrl,
-    })
-    article.value = data.value || {}
-  } catch (error) {
-    article.value = {}
-  } finally {
-    pending.value = false
-  }
+interface Article {
+  slug: string
+  title: string
+  summary: string
+  image?: string | null
+  category?: {
+    name: string
+    slug: string
+  } | null
+  created_at: string
 }
 
-watch(() => route.params.slug, async (newSlug) => {
-  slug.value = newSlug as string
-  await fetchArticle(slug.value)
-})
+defineProps<{
+  article: Article
+}>()
 
-onMounted(async () => {
-  await fetchArticle(slug.value)
+const cardRef = ref<HTMLElement | null>(null)
+
+function formatDate(d: string) {
+  return new Date(d).toLocaleDateString()
+}
+
+onMounted(() => {
+  const el = cardRef.value
+  if (!el) return
+  const img = el.querySelector('.img')
+  const tl = gsap.timeline({ paused: true })
+  tl.to(img, { scale: 1.05, duration: 0.4 })
+    .to('.title', { textDecoration: 'underline', duration: 0.2 }, 0)
+    .to('.read', { boxShadow: '0 0 8px rgba(255,255,255,0.5)', duration: 0.4 }, 0)
+
+  el.addEventListener('mouseenter', () => tl.play())
+  el.addEventListener('mouseleave', () => tl.reverse())
 })
 </script>
 
 <style scoped>
 @reference "@/assets/css/main.css";
-.article-wrapper {
-  @apply bg-transparent dark:text-primary flex flex-col min-h-screen;
-}
-.cover-image {
-  @apply w-full h-72 md:h-[60vh] overflow-hidden;
-}
-.cover-img {
-  @apply w-full h-full object-cover;
-}
-.body-section {
-  @apply mx-auto px-4 py-8 md:py-12 w-full max-w-3xl space-y-6;
-}
-.article-title {
-  @apply font-display text-4xl md:text-5xl font-bold;
-}
-.meta {
-  @apply text-sm text-gray-400 mb-4;
-}
-.article-content {
-  @apply max-w-[65ch] leading-relaxed space-y-6;
-}
-.back-btn {
-  @apply text-accent mb-6 inline-block transition-transform;
+.article-card {
+  @apply bg-dark text-secondary rounded-2xl p-4 hover:shadow-lg transition;
 }
 </style>
+
 

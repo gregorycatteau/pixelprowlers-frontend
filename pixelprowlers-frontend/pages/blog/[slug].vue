@@ -30,8 +30,8 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from '#imports'
-import { ref, onMounted } from 'vue'
+import { useRoute, useRuntimeConfig } from '#imports'
+import { ref, onMounted, watch } from 'vue'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -53,13 +53,23 @@ interface Article {
 }
 
 const route = useRoute()
-const slug = route.params.slug as string
+const slug = ref(route.params.slug as string)
 
-const { data: article, pending } = await useFetch<Article>(
-  `/blog/articles/${slug}/`,
+const { data: article, pending, error, refresh } = useFetch<Article>(
+  `/blog/articles/${slug.value}/`,
   {
     baseURL: useRuntimeConfig().public.apiBaseUrl,
-    key: `article-${slug}`,
+    key: `article-${slug.value}`,
+    server: false,
+    watch: [slug],
+  }
+)
+
+watch(
+  () => route.params.slug,
+  (newSlug) => {
+    slug.value = newSlug as string
+    refresh()
   }
 )
 
@@ -73,7 +83,7 @@ const contentRef = ref<HTMLElement | null>(null)
 const backBtnRef = ref<HTMLElement | null>(null)
 
 onMounted(() => {
-  if (!process.client) return
+  if (!process.client || !article.value) return
 
   const ctx = gsap.context(() => {
     if (titleRef.value) {
@@ -85,27 +95,31 @@ onMounted(() => {
       })
     }
 
-    const paragraphs = contentRef.value?.querySelectorAll('p, blockquote') ?? []
-    if (paragraphs.length > 0) {
-      gsap.from(paragraphs, {
-        opacity: 0,
-        y: 20,
-        stagger: 0.2,
-        duration: 0.6,
-        ease: 'power2.out',
-      })
+    if (contentRef.value) {
+      const paragraphs = contentRef.value.querySelectorAll('p, blockquote')
+      if (paragraphs.length > 0) {
+        gsap.from(paragraphs, {
+          opacity: 0,
+          y: 20,
+          stagger: 0.2,
+          duration: 0.6,
+          ease: 'power2.out',
+        })
+      }
     }
 
-    const img = coverRef.value?.querySelector('img')
-    if (img && coverRef.value) {
-      gsap.to(img, {
-        scale: 1.1,
-        scrollTrigger: {
-          trigger: coverRef.value,
-          start: 'top top',
-          scrub: true,
-        },
-      })
+    if (coverRef.value) {
+      const img = coverRef.value.querySelector('img')
+      if (img) {
+        gsap.to(img, {
+          scale: 1.1,
+          scrollTrigger: {
+            trigger: coverRef.value,
+            start: 'top top',
+            scrub: true,
+          },
+        })
+      }
     }
 
     if (backBtnRef.value) {
@@ -116,11 +130,13 @@ onMounted(() => {
         gsap.to(backBtnRef.value!, { scale: 1, duration: 0.2 })
       })
     }
-  }, coverRef)
+  })
 
   return () => ctx.revert()
 })
 </script>
+
+
 
 <style scoped>
 @reference "@/assets/css/main.css";
