@@ -17,13 +17,14 @@ class ArticleListView(generics.ListAPIView):
         return Article.objects.filter(
             models.Q(start_date__isnull=True) | models.Q(start_date__lte=now),
             models.Q(end_date__isnull=True) | models.Q(end_date__gte=now),
+            is_published=True
         ).order_by('-created_at')
 
 
 class ArticleDetailView(generics.RetrieveAPIView):
     """
     Vue détail pour un article précis, récupéré via son slug.
-    Vérifie également la publication effective via la méthode is_published().
+    Vérifie également la publication effective.
     """
     serializer_class = ArticleSerializer
     lookup_field = 'slug'
@@ -33,7 +34,7 @@ class ArticleDetailView(generics.RetrieveAPIView):
 
     def get_object(self):
         obj = super().get_object()
-        if not obj.is_published():
+        if not obj.is_published:  # <-- correction ici
             raise Http404("Cet article n'est pas publié")
         return obj
 

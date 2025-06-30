@@ -49,7 +49,7 @@ const toggleMenu = () => {
   @apply bg-accent text-white font-semibold px-4 py-2 rounded-md hover:bg-cyan-800 transition-colors;
 }
 .hamburger {
-  @apply text-white hover:text-accent transition duration-300;
+  @apply text-accent hover:text-shadow-accent transition duration-300;
 }
 </style>
 

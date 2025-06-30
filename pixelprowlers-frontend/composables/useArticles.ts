@@ -9,12 +9,34 @@ export interface Article {
   category: Category
   created_at: string
   image?: string | null
+  authors?: Author[]
+  sections?: ArticleSection[]
+  footnotes?: Footnote[]
+  related_articles?: string[]
 }
 
 export interface Category {
   id: number
   name: string
   slug: string
+}
+
+export interface Author {
+  name: string
+  role?: string
+  avatar?: string
+}
+
+export interface ArticleSection {
+  title: string
+  content: string
+  image?: string | null
+  order: number
+}
+
+export interface Footnote {
+  text: string
+  order: number
 }
 
 export function getArticles() {

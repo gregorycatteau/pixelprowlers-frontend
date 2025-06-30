@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 /* 🎨 Couleurs ajustées avec meilleur contraste (adapté malvoyants) */
 @theme {

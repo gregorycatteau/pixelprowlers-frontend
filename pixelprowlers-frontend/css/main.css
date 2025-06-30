@@ -1,8 +1,9 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @layer base {
   body {
-    @apply bg-secondary text-dark font-sans antialiased;
+    @apply bg-accent text-dark font-sans antialiased;
   }
 
   h1, h2, h3, h4 {

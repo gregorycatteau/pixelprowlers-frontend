@@ -1,41 +1,77 @@
 <template>
-  <div v-if="pending" class="text-center py-6">Chargement...</div>
-  <article v-else-if="article" class="article-wrapper">
-    <section class="cover-image" ref="coverRef">
+  <div v-if="pending" class="text-center py-8">Chargement...</div>
+
+  <div v-else-if="article" class="blog-article-page">
+    <Breadcrumb :items="breadcrumbItems" class="mb-4" />
+
+    <section class="article-top">
       <img
-        :src="article.image || 'https://placehold.co/1200x600'"
+        v-if="article.image"
+        :src="article.image"
         alt="Image de couverture"
         class="cover-img"
       />
-    </section>
-
-    <section class="body-section">
-      <NuxtLink to="/blog" ref="backBtnRef" class="back-btn">
-        &larr; Tous les articles
-      </NuxtLink>
-      <h1 ref="titleRef" class="article-title">
-        {{ article.title }}
-      </h1>
-      <p class="meta">
-        {{ formatDate(article.created_at) }} • {{ article.category.name }}
-      </p>
-      <div
-        ref="contentRef"
-        class="article-content"
-        v-html="article.content"
+      <ArticleHeader
+        :title="article.title"
+        :date="formatDate(article.created_at)"
+        :category="article.category.name"
+        :authors="article.authors"
       />
     </section>
-  </article>
-  <p v-else class="text-center py-6 text-red-400">Article introuvable</p>
+
+    <div class="article-body-wrapper">
+      <aside class="toc-sidebar">
+        <TableOfContents :items="tocItems" />
+      </aside>
+
+      <main class="article-sections">
+        <template v-for="section in article.sections" :key="section.order">
+          <SectionBlock
+            :id="`section-${section.order}`"
+            :title="section.title"
+            :content="section.content"
+            :image="section.image"
+          />
+        </template>
+
+        <Footnotes :notes="article.footnotes || []" />
+        <RelatedArticles :articles="article.related_articles || []" />
+      </main>
+    </div>
+  </div>
+
+  <p v-else class="text-center py-8 text-red-500">Article introuvable</p>
 </template>
 
 <script setup lang="ts">
 import { useRoute, useRuntimeConfig } from '#imports'
-import { ref, onMounted, watch } from 'vue'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { ref, watch, computed } from 'vue'
+import DOMPurify from 'dompurify'
 
-gsap.registerPlugin(ScrollTrigger)
+import Breadcrumb from '@/components/navigation/Breadcrumb.vue'
+import ArticleHeader from '@/components/blog/article/ArticleHeader.vue'
+import TableOfContents from '@/components/blog/article/TableOfContents.vue'
+import SectionBlock from '@/components/blog/article/SectionBlock.vue'
+import Footnotes from '@/components/blog/article/FootNotes.vue'
+import RelatedArticles from '@/components/blog/article/RelatedArticles.vue'
+
+interface Author {
+  name: string
+  role?: string
+  avatar?: string
+}
+
+interface Section {
+  title: string
+  content: string
+  image?: string
+  order: number
+}
+
+interface Footnote {
+  text: string
+  order: number
+}
 
 interface Article {
   id: number
@@ -50,12 +86,16 @@ interface Article {
     name: string
     slug: string
   }
+  authors?: Author[]
+  sections?: Section[]
+  footnotes?: Footnote[]
+  related_articles?: any[]
 }
 
 const route = useRoute()
 const slug = ref(route.params.slug as string)
 
-const { data: article, pending, error, refresh } = useFetch<Article>(
+const { data: article, pending, refresh } = useFetch<Article>(
   `/blog/articles/${slug.value}/`,
   {
     baseURL: useRuntimeConfig().public.apiBaseUrl,
@@ -74,107 +114,56 @@ watch(
 )
 
 function formatDate(date: string) {
-  return new Date(date).toLocaleDateString()
+  return new Date(date).toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
 }
 
-const titleRef = ref<HTMLElement | null>(null)
-const coverRef = ref<HTMLElement | null>(null)
-const contentRef = ref<HTMLElement | null>(null)
-const backBtnRef = ref<HTMLElement | null>(null)
-
-onMounted(() => {
-  if (!process.client || !article.value) return
-
-  const ctx = gsap.context(() => {
-    if (titleRef.value) {
-      gsap.from(titleRef.value, {
-        y: 40,
-        opacity: 0,
-        duration: 0.8,
-        ease: 'power2.out',
-      })
-    }
-
-    if (contentRef.value) {
-      const paragraphs = contentRef.value.querySelectorAll('p, blockquote')
-      if (paragraphs.length > 0) {
-        gsap.from(paragraphs, {
-          opacity: 0,
-          y: 20,
-          stagger: 0.2,
-          duration: 0.6,
-          ease: 'power2.out',
-        })
-      }
-    }
-
-    if (coverRef.value) {
-      const img = coverRef.value.querySelector('img')
-      if (img) {
-        gsap.to(img, {
-          scale: 1.1,
-          scrollTrigger: {
-            trigger: coverRef.value,
-            start: 'top top',
-            scrub: true,
-          },
-        })
-      }
-    }
-
-    if (backBtnRef.value) {
-      backBtnRef.value.addEventListener('mouseenter', () => {
-        gsap.to(backBtnRef.value!, { scale: 1.05, duration: 0.2 })
-      })
-      backBtnRef.value.addEventListener('mouseleave', () => {
-        gsap.to(backBtnRef.value!, { scale: 1, duration: 0.2 })
-      })
-    }
-  })
-
-  return () => ctx.revert()
+// Breadcrumb réactif sur article
+const breadcrumbItems = computed(() => {
+  if (!article.value) return [{ label: 'Blog', to: '/blog' }]
+  return [
+    { label: 'Blog', to: '/blog' },
+    { label: article.value.title }
+  ]
 })
+
+// TOC items
+const tocItems = computed(() =>
+  (article.value?.sections || []).map((s) => ({
+    id: `section-${s.order}`,
+    title: DOMPurify.sanitize(s.title),
+  }))
+)
 </script>
-
-
 
 <style scoped>
 @reference "@/assets/css/main.css";
 
-.article-wrapper {
-  @apply bg-transparent dark:text-secondary flex flex-col min-h-screen;
+.blog-article-page {
+  @apply px-4 md:px-8 lg:px-16 mt-12;
 }
 
-.cover-image {
-  @apply w-full h-72 md:h-[60vh] overflow-hidden;
+.article-top {
+  @apply max-w-4xl mx-auto mb-12;
 }
 
 .cover-img {
-  @apply w-full h-full object-cover;
+  @apply w-full max-h-96 object-cover rounded-xl shadow-lg mb-6;
 }
 
-.body-section {
-  @apply mx-auto px-4 py-8 md:py-12 w-full max-w-3xl space-y-6;
+.article-body-wrapper {
+  @apply flex flex-col lg:flex-row gap-8 w-full max-w-6xl mx-auto;
 }
 
-.article-title {
-  @apply font-display text-4xl md:text-5xl font-bold;
+.toc-sidebar {
+  @apply w-full lg:w-1/4 sticky top-28 h-fit;
 }
 
-.meta {
-  @apply text-sm text-gray-400 mb-4;
-}
-
-.article-content {
-  @apply max-w-[65ch] leading-relaxed space-y-6;
-}
-
-.article-content blockquote {
-  @apply border-l-4 border-violet-400 pl-4 italic text-violet-300;
-}
-
-.back-btn {
-  @apply text-accent mb-6 inline-block transition-transform;
+.article-sections {
+  @apply flex-1 space-y-12 pb-20;
 }
 </style>
 

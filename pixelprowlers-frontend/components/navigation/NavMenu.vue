@@ -33,7 +33,7 @@
           <li v-for="(item, idx) in menu" :key="item.to">
             <NuxtLink
               :to="item.to"
-              :ref="el => (navItems[idx] = el as HTMLElement | null)"
+              :ref="(el) => assignNavRef(el, idx)"
               @click="closeMenu"
               @mouseenter="hoverLink(idx)"
               @mouseleave="leaveLink(idx)"
@@ -62,23 +62,29 @@ const props = defineProps<{
 const menu = [
   { to: '/', label: 'Accueil' },
   { to: '/services', label: 'Services' },
-  { to: '/projets', label: 'Projets' },
+  
   { to: '/contact', label: 'Contact' },
-  { to: '/a-propos', label: 'À propos' },
+  
   { to: '/blog', label: 'Blog' }
 ]
 
-// ✅ Typage sécurisé pour les refs DOM
 const menuContainer = ref<HTMLElement | null>(null)
 const imageContainer = ref<HTMLDivElement | null>(null)
 const closeBtn = ref<HTMLButtonElement | null>(null)
-const navItems = ref<(HTMLElement | null)[]>([])
+const navItems = ref<HTMLElement[]>([])
 
 const isVisible = ref(false)
 const prefersReducedMotion = ref(false)
 
 let menuTl: gsap.core.Timeline | null = null
 let idleAnim: gsap.core.Tween | null = null
+
+const assignNavRef = (el: Element | { $el?: Element } | null, idx: number) => {
+  const linkEl = (el as any)?.$el || el
+  if (linkEl instanceof HTMLElement) {
+    navItems.value[idx] = linkEl
+  }
+}
 
 onMounted(() => {
   prefersReducedMotion.value = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -131,6 +137,7 @@ watch(
       menuTl?.reverse()
       menuTl?.eventCallback('onReverseComplete', () => {
         isVisible.value = false
+        emit('close')
       })
     }
   },

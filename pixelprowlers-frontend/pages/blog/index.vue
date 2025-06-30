@@ -1,14 +1,25 @@
 <template>
-  <div class="blog-page dark">
-    <BlogHero />
-    <div class="max-w-6xl mx-auto px-4">
+  <div class="blog-page dark flex">
+    <!-- Aside avec filtres -->
+    <aside class="hidden lg:block fixed top-20 left-0 w-64 min-h-screen overflow-y-auto p-4 bg-dark border-r border-gray-700">
+
       <BlogFilters
         v-model:keyword="keyword"
         v-model:selectedCategories="selectedCategories"
         v-model:dateOrder="dateOrder"
         :categories="categories"
-        class="mb-8"
       />
+    </aside>
+
+    <!-- Contenu principal -->
+    <main class="flex-1 ml-0 lg:ml-64 px-4 max-w-7xl mx-auto">
+      <!-- Hero Article -->
+      <HeroArticle :article="formattedLatestArticle" class="mb-12" />
+
+      <!-- Newsletter -->
+      <NewsletterSignup class="mb-16" />
+
+      <!-- Articles -->
       <div v-if="pending" class="text-center py-6">Chargement...</div>
       <template v-else>
         <div
@@ -23,10 +34,8 @@
           />
         </div>
         <p v-else class="text-center py-6">Aucun article disponible.</p>
-        <nav
-          v-if="totalPages > 1"
-          class="flex justify-center mt-8 space-x-2"
-        >
+
+        <nav v-if="totalPages > 1" class="flex justify-center mt-8 space-x-2">
           <button
             v-for="page in totalPages"
             :key="page"
@@ -41,22 +50,18 @@
           </button>
         </nav>
       </template>
-    </div>
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue'
 import gsap from 'gsap'
-import BlogHero from '@/components/blog/BlogHero.vue'
 import BlogFilters from '@/components/blog/BlogFilters.vue'
 import ArticleCard from '@/components/blog/ArticleCard.vue'
-import {
-  getArticles,
-  getCategories,
-  type Article,
-  type Category,
-} from '@/composables/useArticles'
+import HeroArticle from '@/components/blog/article/HeroArticle.vue'
+import NewsletterSignup from '@/components/blog/article/NewsletterSignup.vue'
+import { getArticles, getCategories, type Article, type Category } from '@/composables/useArticles'
 
 const keyword = ref('')
 const selectedCategories = ref<string[]>([])
@@ -78,8 +83,9 @@ const formatArticle = (a: Article) => ({
 
 const filteredArticles = computed(() => {
   const kw = keyword.value.toLowerCase()
-  let list = (articles.value ?? [])
-    .filter((a) => a.title.toLowerCase().includes(kw))
+  let list = (articles.value ?? []).filter((a) =>
+    a.title.toLowerCase().includes(kw)
+  )
   if (selectedCategories.value.length) {
     list = list.filter((a) =>
       selectedCategories.value.includes(
@@ -100,9 +106,11 @@ const paginatedArticles = computed(() => {
   return filteredArticles.value.slice(start, start + 10)
 })
 
-const totalPages = computed(() =>
-  Math.max(1, Math.ceil(filteredArticles.value.length / 10))
-)
+const latestArticle = computed(() => filteredArticles.value[0])
+
+const formattedLatestArticle = computed(() => latestArticle.value ? formatArticle(latestArticle.value) : null)
+
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredArticles.value.length / 10)))
 
 const articlesRef = ref<HTMLElement | null>(null)
 
@@ -121,6 +129,6 @@ onMounted(async () => {
 <style scoped>
 @reference "@/assets/css/main.css";
 .blog-page {
-  @apply min-h-screen bg-dark text-secondary pt-10 pb-20;
+  @apply min-h-screen bg-dark text-shadow-accent pt-10 pb-20;
 }
 </style>
