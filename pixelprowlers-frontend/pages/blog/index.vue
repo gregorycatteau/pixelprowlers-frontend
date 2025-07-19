@@ -1,20 +1,13 @@
 <template>
   <div class="blog-page dark flex">
     <!-- Aside avec filtres -->
-    <aside class="hidden lg:block fixed top-20 left-0 w-64 min-h-screen overflow-y-auto p-4 bg-dark border-r border-gray-700">
-
-      <BlogFilters
-        v-model:keyword="keyword"
-        v-model:selectedCategories="selectedCategories"
-        v-model:dateOrder="dateOrder"
-        :categories="categories"
-      />
-    </aside>
+   
 
     <!-- Contenu principal -->
     <main class="flex-1 ml-0 lg:ml-64 px-4 max-w-7xl mx-auto">
       <!-- Hero Article -->
-      <HeroArticle :article="formattedLatestArticle" class="mb-12" />
+      <HeroArticle v-if="formattedLatestArticle" :article="formattedLatestArticle" class="mb-12" />
+
 
       <!-- Newsletter -->
       <NewsletterSignup class="mb-16" />
@@ -56,6 +49,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue'
+import { useAsyncData } from 'nuxt/app'
 import gsap from 'gsap'
 import BlogFilters from '@/components/blog/BlogFilters.vue'
 import ArticleCard from '@/components/blog/ArticleCard.vue'

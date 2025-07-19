@@ -43,21 +43,16 @@
 
 <script setup lang="ts">
 import { ref, watch, nextTick } from 'vue'
-import gsap from 'gsap'
+import { gsap } from 'gsap'
 
-// Props reçues depuis le composant parent (ScrollLayout.vue)
 const props = defineProps<{
   scrollFactor: number
   isActive: boolean
 }>()
 
-// Références DOM
 const whoIAmRef = ref<HTMLElement | null>(null)
-
-// État local pour éviter de rejouer l'animation en boucle
 const wasVisible = ref(false)
 
-// Textes d’introduction (1 ligne = 1 paragraphe animé lettre par lettre)
 const introLines = [
   "Je ne suis pas une agence.",
   "Je suis un artisan du web. Un développeur qui a longtemps été de l'autre côté.",
@@ -66,7 +61,6 @@ const introLines = [
   "Aujourd’hui, je mets mon savoir-faire au service de ceux qui bâtissent du lien."
 ]
 
-// Données des cartes à afficher
 interface Card {
   img: string
   title: string
@@ -91,29 +85,28 @@ const cards: Card[] = [
   }
 ]
 
-// Animation déclenchée dès que isActive passe à true
 watch(
   () => props.scrollFactor,
   async () => {
     const visible = props.isActive
-    if (visible === wasVisible.value) return // on ne rejoue pas si rien ne change
+    if (visible === wasVisible.value) return
     wasVisible.value = visible
 
     if (!whoIAmRef.value) return
 
-    // Animation d’apparition/disparition du conteneur
-    gsap.to(whoIAmRef.value, {
-      opacity: visible ? 1 : 0,
-      pointerEvents: visible ? 'auto' : 'none',
-      duration: 0.8,
-      ease: 'power2.out'
-    })
+    if (typeof gsap.to === 'function') {
+      gsap.to(whoIAmRef.value, {
+        opacity: visible ? 1 : 0,
+        pointerEvents: visible ? 'auto' : 'none',
+        duration: 0.8,
+        ease: 'power2.out'
+      })
+    }
 
-    if (visible) {
+    if (visible && typeof gsap.fromTo === 'function') {
       await nextTick()
       const el = whoIAmRef.value
 
-      // Animation des caractères des lignes d’intro
       gsap.fromTo(
         el.querySelectorAll('.intro-char'),
         { y: 40, opacity: 0, rotationX: -90 },
@@ -130,7 +123,6 @@ watch(
         }
       )
 
-      // Animation des cartes
       gsap.fromTo(
         el.querySelectorAll('.whoiam-card'),
         { y: 40, opacity: 0, scale: 0.95 },
@@ -144,7 +136,6 @@ watch(
         }
       )
 
-      // Animation finale de la citation
       gsap.fromTo(
         el.querySelector('.quote-text'),
         { opacity: 0, y: 10 },
@@ -161,10 +152,9 @@ watch(
 )
 </script>
 
-
-
 <style scoped>
 @reference "@/assets/css/main.css";
+
 .whoiam-container {
   @apply absolute top-0 left-0 w-full min-h-screen flex flex-col items-center justify-center px-6 py-24 gap-20;
   background: linear-gradient(to bottom, #f9f7f3, #eae3d9);
@@ -174,7 +164,6 @@ watch(
   transition: opacity 0.8s ease-in-out;
 }
 
-/* Texte introductif */
 .intro-wrapper {
   @apply max-w-4xl text-center space-y-4;
 }
@@ -192,7 +181,6 @@ watch(
   will-change: transform, opacity;
 }
 
-/* Cartes */
 .cards-wrapper {
   @apply flex flex-wrap gap-10 justify-center;
 }
@@ -212,7 +200,6 @@ watch(
   filter: brightness(0.96) contrast(1.1);
 }
 
-/* Titres et textes de carte */
 .card-title {
   @apply text-lg font-semibold mb-2 text-center text-gray-800;
 }
@@ -221,7 +208,6 @@ watch(
   @apply text-base text-center text-gray-600;
 }
 
-/* Citation finale */
 .quote-wrapper {
   @apply mt-10 text-center;
 }

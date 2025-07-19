@@ -2,7 +2,8 @@ from .base import *
 from decouple import Config, RepositoryEnv
 import os
 
-env_path = os.path.join(BASE_DIR, 'env/.env.development')
+env_path = os.path.join(BASE_DIR, '.env.development')
+
 config = Config(RepositoryEnv(env_path))
 
 

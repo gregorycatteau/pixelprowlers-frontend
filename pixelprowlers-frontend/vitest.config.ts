@@ -1,15 +1,24 @@
-import { defineConfig } from 'vitest/config';
-import vue from '@vitejs/plugin-vue';
+import { defineConfig } from 'vitest/config'
+import vue from '@vitejs/plugin-vue'
+import path from 'path'
 
 export default defineConfig({
   plugins: [vue()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './'),
+      '#app': 'nuxt/app',
+      '#imports': 'nuxt/imports',
+     
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',
     include: [
       '**/__tests__/**/*.test.{js,ts}',
       'test/**/*.{test,spec}.{js,ts}',
-      'tests/**/*.{test,spec}.{js,ts}'
+      'tests/**/*.{test,spec}.{js,ts}',
     ],
     setupFiles: './test/setup.ts',
     coverage: {
@@ -25,9 +34,10 @@ export default defineConfig({
         'node_modules/',
         'test/setup.ts',
         'dist/',
-        '**/*.d.ts'
-      ]
-    }
-  }
-});
+        '**/*.d.ts',
+      ],
+    },
+  },
+})
+
 

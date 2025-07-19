@@ -216,10 +216,10 @@ async function onSubmit() {
   @apply flex flex-col items-center justify-center min-h-screen p-6 space-y-4;
 }
 .main-title {
-  @apply text-3xl font-bold text-center;
+  @apply text-3xl font-bold text-center text-accent;
 }
 .sub-title {
-  @apply text-lg text-center text-gray-600 mb-4;
+  @apply text-lg text-center text-accent mb-4;
 }
 .contact-content {
   @apply flex flex-col md:flex-row items-center w-full max-w-5xl gap-8;

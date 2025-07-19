@@ -1,35 +1,35 @@
 <template>
   <section class="scroll-section">
-    <!-- Sections pilotées -->
     <Hero :scrollFactor="scrollFactor" :isActive="currentSection === 'hero'" />
     <Problems :scrollFactor="scrollFactor" :isActive="currentSection === 'problems'" />
     <WhoIAm :scrollFactor="scrollFactor" :isActive="currentSection === 'whoiam'" />
 
-    <!-- Debug visuel -->
-    <div v-if="debugVisible" class="debug">
+    <div v-if="props.debugVisible" class="debug">
       <p>🎯 SF: {{ scrollFactor.toFixed(2) }}</p>
       <p>📍 Section: {{ currentSection }}</p>
     </div>
   </section>
 </template>
 
+
 <script setup lang="ts">
 import { ref, watch, computed, onMounted, onBeforeUnmount, provide } from 'vue'
 import { useScrollLock } from '@vueuse/core'
 import gsap from 'gsap'
-
-// Composants
 import Hero from '@/components/home/hero.vue'
 import Problems from '@/components/home/problems.vue'
 import WhoIAm from '@/components/home/whoIAm.vue'
 
-// Réactivité
+const props = withDefaults(defineProps<{
+  debugVisible?: boolean
+}>(), {
+  debugVisible: false
+})
+
 const scrollFactor = ref(0)
 const scrollUnlocked = ref(true)
 const maxScrollFactor = 3
-const debugVisible = ref(false)
 
-// Détermination de la section visible
 const currentSection = computed(() => {
   const sf = scrollFactor.value
   if (sf < 1) return 'hero'
@@ -38,7 +38,6 @@ const currentSection = computed(() => {
   return 'next'
 })
 
-// Injection éventuelle
 provide('scrollFactor', scrollFactor)
 
 onMounted(() => {
@@ -50,7 +49,6 @@ onMounted(() => {
   })
 
   window.addEventListener('wheel', onWheel, { passive: true })
-  debugVisible.value = true
   console.log('📦 scrollLayout mounted – scrollFactor is ready to rock')
 })
 
@@ -66,11 +64,9 @@ function onWheel(e: WheelEvent) {
 
   const delta = e.deltaY
   const nextValue = scrollFactor.value + delta / 800
-
   scrollFactor.value = Math.min(Math.max(nextValue, 0), maxScrollFactor)
 }
 
-// Unlock scroll si interaction détectée
 watch(scrollFactor, (val) => {
   if (val > 0.01 && !scrollUnlocked.value) {
     scrollUnlocked.value = true
@@ -78,6 +74,7 @@ watch(scrollFactor, (val) => {
   }
 })
 </script>
+
 
 <style scoped>
 @reference "@/assets/css/main.css";

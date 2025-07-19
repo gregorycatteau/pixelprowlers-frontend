@@ -1,5 +1,6 @@
 import { mount } from '@vue/test-utils'
-import Breadcrumb from '../../components/navigation/Breadcrumb.vue'
+import Breadcrumb from "@/components/navigation/Breadcrumb.vue"
+import { describe, it, expect } from 'vitest'
 
 // 🧪 Test du composant Breadcrumb
 

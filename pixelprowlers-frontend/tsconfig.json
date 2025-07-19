@@ -1,6 +1,21 @@
 {
   "extends": "./.nuxt/tsconfig.json",
   "compilerOptions": {
-    "typeRoots": ["./node_modules/@types", "./types"]
-  }
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "typeRoots": ["./node_modules/@types", "./types"],
+    "types": ["vitest", "node"] 
+  },
+  "include": [
+    "nuxt.config.ts",
+    "vite.config.ts",
+    "env.d.ts",
+    "components/**/*.vue",
+    "pages/**/*.vue",
+    "composables/**/*.ts",
+    "test/**/*.ts",
+    "test/**/*.spec.ts"
+  ]
 }

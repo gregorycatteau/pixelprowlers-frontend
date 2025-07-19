@@ -21,9 +21,11 @@ html, body, #__nuxt, #__layout {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow: hidden !important;
-  overscroll-behavior: none;
+  overflow-x: hidden; /* ✅ bloque uniquement le scroll horizontal */
+  overflow-y: auto;   /* ✅ autorise le scroll vertical */
+  overscroll-behavior-y: contain; /* facultatif, évite les rebonds */
 }
+
 /* 🧱 Base avec contraste renforcé */
 @layer base {
   body {

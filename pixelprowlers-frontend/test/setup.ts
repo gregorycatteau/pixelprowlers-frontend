@@ -1,27 +1,64 @@
 import { config } from '@vue/test-utils'
 import '@testing-library/jest-dom'
+import { createCanvas } from 'canvas'
+import { vi } from 'vitest'
 
 // 👉 Ici, tu peux stuber des composants globaux si nécessaire
 config.global.stubs = {
-  // Exemple : tu veux ignorer <NuxtLink> dans les snapshots ou tests
   NuxtLink: {
-    template: '<a><slot /></a>'
+    template: '<a><slot /></a>',
   },
-  // Exemple : tu veux ignorer les icônes ou composants tiers lourds
-  IconComponent: true
+  IconComponent: true,
 }
 
-// 👉 Si tu as des plugins Vue globaux, tu peux aussi ajouter ici
-// config.global.plugins = [monPluginVue, monAutrePlugin]
+// 👉 Si tu as des plugins Vue globaux
+// config.global.plugins = [monPluginVue]
 
-// 👉 Configurer un wrapper global si tu as besoin de mocks d'injection, etc.
+// 👉 Configurer des mocks globaux
 config.global.mocks = {
-  $t: (msg: string) => msg,  // Exemple si tu utilises i18n
+  $t: (msg: string) => msg,
 }
 
-// 👉 Exemple pour désactiver warnings sur les transitions
+// 👉 Désactiver warnings sur les transitions
 config.global.renderStubDefaultSlot = true
 
-// 💬 Tu peux aussi ajouter des extensions custom à Jest-DOM si besoin
+// ✅ 💣 Fix Canvas pour JSDOM
+Object.defineProperty(global, 'HTMLCanvasElement', {
+  value: class {
+    getContext() {
+      return createCanvas(200, 200).getContext('2d')
+    }
+  },
+})
+
+// ✅ 💣 Mock complet de GSAP
+vi.mock('gsap', async (importOriginal) => {
+  const actual = await importOriginal()
+  const fakeTimeline = () => ({
+    to: vi.fn().mockReturnThis(),
+    from: vi.fn().mockReturnThis(),
+    add: vi.fn().mockReturnThis(),
+    play: vi.fn().mockReturnThis(),
+  })
+
+  return {
+    ...actual,
+    to: vi.fn(),
+    from: vi.fn(),
+    timeline: vi.fn(fakeTimeline),
+    registerPlugin: vi.fn(),
+    // ⚡ Voici la clé qui corrige tout
+    default: {
+      ...actual,
+      to: vi.fn(),
+      from: vi.fn(),
+      timeline: vi.fn(fakeTimeline),
+      registerPlugin: vi.fn(),
+    },
+  }
+})
+
+// 💬 Tu peux aussi ajouter des extensions custom à Jest-DOM ici
 // ex : expect.extend(...)
-;
+
+

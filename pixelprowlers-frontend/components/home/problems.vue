@@ -40,7 +40,7 @@
 
 <script setup lang="ts">
 import { ref, watch, nextTick } from "vue"
-import gsap from "gsap"
+import { gsap } from "gsap"
 import RainCanvas from '@/components/animation/RainCanvas.vue'
 
 const props = defineProps<{
@@ -92,18 +92,20 @@ watch(
 
     const visible = val >= 1 && val < 1.5
 
-    // Animation d’apparition du contenu
-    gsap.to(problemsRef.value, {
-      opacity: visible ? 1 : 0,
-      pointerEvents: visible ? "auto" : "none",
-      duration: 0.8,
-      ease: "power2.out"
-    })
+    // Apparition / disparition de la section
+    if (typeof gsap.to === 'function') {
+      gsap.to(problemsRef.value, {
+        opacity: visible ? 1 : 0,
+        pointerEvents: visible ? "auto" : "none",
+        duration: 0.8,
+        ease: "power2.out"
+      })
+    }
 
     // Parallax background
-    if (parallaxRef.value) {
+    if (parallaxRef.value && typeof gsap.to === 'function') {
       gsap.to(parallaxRef.value, {
-        y: -val * 100, // Ajuste ce facteur pour + ou - d'effet
+        y: -val * 100,
         scale: 1.05,
         duration: 0.6,
         ease: "power2.out"
@@ -113,51 +115,52 @@ watch(
     if (visible) {
       await nextTick()
 
-      gsap.fromTo(
-        ".intro-line",
-        { y: 30, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          stagger: 0.3,
-          duration: 1.5,
-          ease: "power3.out"
-        }
-      )
+      if (typeof gsap.fromTo === 'function') {
+        gsap.fromTo(
+          ".intro-line",
+          { y: 30, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            stagger: 0.3,
+            duration: 1.5,
+            ease: "power3.out"
+          }
+        )
 
-      gsap.fromTo(
-        ".problem-card",
-        { y: 60, opacity: 0, scale: 0.95 },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          stagger: 0.4,
-          duration: 1.8,
-          ease: "power4.out"
-        }
-      )
+        gsap.fromTo(
+          ".problem-card",
+          { y: 60, opacity: 0, scale: 0.95 },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            stagger: 0.4,
+            duration: 1.8,
+            ease: "power4.out"
+          }
+        )
 
-      gsap.fromTo(
-        ".cta-container",
-        { opacity: 0, y: 20 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1.2,
-          delay: 2,
-          ease: "power2.out"
-        }
-      )
+        gsap.fromTo(
+          ".cta-container",
+          { opacity: 0, y: 20 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 1.2,
+            delay: 2,
+            ease: "power2.out"
+          }
+        )
+      }
     }
   }
 )
 </script>
 
-
-
 <style scoped>
 @reference "@/assets/css/main.css";
+
 .problems-container {
   @apply relative w-full min-h-screen flex flex-col items-center justify-center px-6 py-24 gap-16;
   background-image: url("/brume-fond.png"), linear-gradient(to bottom, #1c1f23dd, #0a0d11cc);
@@ -242,6 +245,7 @@ watch(
   background: linear-gradient(to right, #5ac8fa, #1e5b91);
   box-shadow: 0 6px 28px rgba(100, 180, 255, 0.5);
 }
+
 .parallax-background {
   @apply absolute inset-0 z-0;
   background-image: url("/brumes.png");
@@ -252,5 +256,4 @@ watch(
   filter: brightness(0.7) blur(4px);
   transition: transform 0.1s linear;
 }
-
 </style>

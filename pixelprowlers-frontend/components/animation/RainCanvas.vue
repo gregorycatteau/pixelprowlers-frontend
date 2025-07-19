@@ -3,8 +3,12 @@
 </template>
 
 <script setup lang="ts">
+// Import des hooks Vue
 import { onMounted, ref, onBeforeUnmount } from 'vue'
 
+/**
+ * Référence au canvas
+ */
 const canvas = ref<HTMLCanvasElement | null>(null)
 
 onMounted(() => {
@@ -13,9 +17,14 @@ onMounted(() => {
 
   const fontSize = 24
   const drops: number[] = []
+
+  // Nombre de colonnes basé sur la largeur
   const columns = Math.floor(window.innerWidth / fontSize)
   for (let i = 0; i < columns; i++) drops[i] = Math.random() * 40
 
+  /**
+   * Fonction pour adapter la taille du canvas lors du resize
+   */
   const resizeCanvas = () => {
     if (canvas.value) {
       canvas.value.width = window.innerWidth
@@ -23,33 +32,38 @@ onMounted(() => {
     }
   }
 
+  // Initialisation de la taille
   resizeCanvas()
   window.addEventListener('resize', resizeCanvas)
 
+  /**
+   * Fonction de dessin des gouttes
+   */
   const draw = () => {
-  // Nettoie le canvas SANS le remplir de blanc
-  ctx.clearRect(0, 0, canvas.value!.width, canvas.value!.height)
+    // Nettoie sans remplir
+    ctx.clearRect(0, 0, canvas.value!.width, canvas.value!.height)
 
-  // Gouttes fines blanches
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.15)'
-  ctx.shadowColor = 'rgba(255, 255, 255, 0.2)'
-  ctx.shadowBlur = 4
-  ctx.font = `${fontSize}px monospace`
+    // Paramètres visuels des gouttes
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)'
+    ctx.shadowColor = 'rgba(255, 255, 255, 0.2)'
+    ctx.shadowBlur = 4
+    ctx.font = `${fontSize}px monospace`
 
-  for (let i = 0; i < drops.length; i++) {
-    const text = '|'
-    const x = i * fontSize
-    const y = drops[i] * fontSize
+    for (let i = 0; i < drops.length; i++) {
+      const text = '|'
+      const x = i * fontSize
+      const y = drops[i] * fontSize
 
-    ctx.fillText(text, x, y)
+      ctx.fillText(text, x, y)
 
-    if (y > canvas.value!.height || Math.random() > 0.95) {
-      drops[i] = 0
+      if (y > canvas.value!.height || Math.random() > 0.95) {
+        drops[i] = 0
+      }
+      drops[i] += 1
     }
-    drops[i] += 1
   }
-}
 
+  // Interval de rafraîchissement
   const interval = setInterval(draw, 33)
 
   onBeforeUnmount(() => {
@@ -68,6 +82,6 @@ onMounted(() => {
   height: 100%;
   z-index: 2;
   pointer-events: none;
-  mix-blend-mode: screen; /* Ou 'lighten' si ton fond est très sombre */
+  mix-blend-mode: screen; /* Ou 'lighten' si ton fond est sombre */
 }
 </style>
