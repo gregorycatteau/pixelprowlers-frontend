@@ -1,0 +1,39 @@
+.
+├── =
+├── backend_structure.txt
+├── blog
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── __init__.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── config
+│   ├── asgi.py
+│   ├── __init__.py
+│   ├── settings
+│   │   ├── base.py
+│   │   ├── development.py
+│   │   ├── __init__.py
+│   │   └── test.py
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── designengine
+│   ├── admin.py
+│   ├── apps.py
+│   ├── __init__.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── .env.development
+├── .gitignore
+├── manage.py
+└── requirements.txt
+
+5 directories, 32 files

@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import Category, Article, Author, ArticleSection, Footnote, SectionImage
+from .models import (
+    Category, Article, Author, ArticleSection,
+    Footnote, SectionImage, ArticleRating
+)
+from .forms import ArticleSectionAdminForm
 
 # Admin pour les catégories
 @admin.register(Category)
@@ -21,10 +25,12 @@ class SectionImageInline(admin.TabularInline):
 
 # Inline pour sections
 class ArticleSectionInline(admin.StackedInline):
+    form = ArticleSectionAdminForm
     model = ArticleSection
     extra = 0
     show_change_link = True
     ordering = ['order']
+    sortable_field_name = 'order'
     fields = ('title', 'content', 'order', 'image', 'is_intro', 'is_conclusion')
     inlines = [SectionImageInline]
 
@@ -36,8 +42,15 @@ class FootnoteInline(admin.StackedInline):
 # Admin pour les articles
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'category', 'importance', 'is_published', 'created_at', 'has_introduction', 'has_conclusion')
-    list_filter = ('importance', 'is_published', 'created_at', 'category')
+    list_display = (
+        'title', 'category', 'importance', 'status', 'visibility',
+        'is_featured', 'is_published', 'created_at',
+        'has_introduction', 'has_conclusion'
+    )
+    list_filter = (
+        'importance', 'is_published', 'created_at',
+        'category', 'status', 'visibility', 'is_featured'
+    )
     search_fields = ('title', 'category__name')
     prepopulated_fields = {"slug": ("title",)}
     readonly_fields = ('created_at', 'updated_at')
@@ -45,7 +58,12 @@ class ArticleAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ("Informations générales", {
-            "fields": ('title', 'slug', 'summary', 'category', 'image', 'importance', 'is_published', 'start_date', 'end_date', 'authors', 'related_articles')
+            "fields": (
+                'title', 'slug', 'summary', 'category', 'image',
+                'importance', 'status', 'visibility', 'is_featured',
+                'is_published', 'start_date', 'end_date',
+                'authors', 'related_articles'
+            )
         }),
         ("Options", {
             "fields": ('has_introduction', 'has_conclusion')
@@ -54,3 +72,32 @@ class ArticleAdmin(admin.ModelAdmin):
             "fields": ('created_at', 'updated_at')
         }),
     )
+
+# Admin explicite pour les sections
+@admin.register(ArticleSection)
+class ArticleSectionAdmin(admin.ModelAdmin):
+    form = ArticleSectionAdminForm
+    list_display = ('article', 'title', 'order', 'is_intro', 'is_conclusion')
+    list_filter = ('is_intro', 'is_conclusion', 'article__title')
+    search_fields = ('title', 'article__title')
+    ordering = ('article', 'order')
+    inlines = [SectionImageInline]
+
+# Admin pour les votes utilisateurs
+@admin.register(ArticleRating)
+class ArticleRatingAdmin(admin.ModelAdmin):
+    list_display = (
+        'article', 'criteria_impact',
+        'criteria_clarity', 'criteria_utility', 'average_score', 'created_at'
+    )
+    readonly_fields = (
+        'article', 'criteria_impact',
+        'criteria_clarity', 'criteria_utility', 'created_at'
+    )
+    list_filter = ('created_at', 'article__title')
+    search_fields = ('article__title',)
+
+    def average_score(self, obj):
+        return round(obj.average_score(), 2)
+
+    average_score.short_description = 'Moyenne'

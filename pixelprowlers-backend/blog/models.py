@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.text import slugify
 from django.utils import timezone
+from ckeditor.fields import RichTextField
 import datetime
 
 # Catégories
@@ -35,6 +36,16 @@ class ArticleManager(models.Manager):
 
 # Articles
 class Article(models.Model):
+    class Status(models.TextChoices):
+        DRAFT = 'draft', 'Brouillon'
+        PENDING = 'pending', 'En attente'
+        PUBLISHED = 'published', 'Publié'
+
+    class Visibility(models.TextChoices):
+        PRIVATE = 'private', 'Privé'
+        RESTRICTED = 'restricted', 'Réservé'
+        PUBLIC = 'public', 'Public'
+
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique=True, blank=True)
     summary = models.TextField()
@@ -51,7 +62,20 @@ class Article(models.Model):
     has_conclusion = models.BooleanField(default=True)
     is_published = models.BooleanField(default=False)
 
-    objects = ArticleManager()  # ✅ Remplace le manager par celui personnalisé
+    # Nouveaux champs
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.DRAFT
+    )
+    visibility = models.CharField(
+        max_length=20,
+        choices=Visibility.choices,
+        default=Visibility.PRIVATE
+    )
+    is_featured = models.BooleanField(default=False)
+
+    objects = ArticleManager()
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -59,9 +83,6 @@ class Article(models.Model):
         super().save(*args, **kwargs)
 
     def is_published_now(self):
-        """
-        Vérifie si l'article est actuellement publié.
-        """
         now = timezone.now()
         if not self.is_published:
             return False
@@ -78,7 +99,7 @@ class Article(models.Model):
 class ArticleSection(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='sections')
     title = models.CharField(max_length=255, blank=True)
-    content = models.TextField()
+    content = RichTextField(blank=True, null=True)
     order = models.PositiveIntegerField(default=0)
     image = models.ImageField(upload_to='article_sections/', blank=True, null=True)
     is_intro = models.BooleanField(default=False)
@@ -102,7 +123,7 @@ class SectionImage(models.Model):
 # Footnotes
 class Footnote(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='footnotes')
-    text = models.TextField()
+    text = RichTextField(blank=True, null=True)
     order = models.PositiveIntegerField(default=0)
 
     class Meta:
@@ -110,3 +131,17 @@ class Footnote(models.Model):
 
     def __str__(self):
         return f"{self.article.title} - Note {self.order}"
+
+# Système de vote utilisateur
+class ArticleRating(models.Model):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='ratings')
+    criteria_impact = models.PositiveSmallIntegerField(default=0)
+    criteria_clarity = models.PositiveSmallIntegerField(default=0)
+    criteria_utility = models.PositiveSmallIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def average_score(self):
+        return (self.criteria_impact + self.criteria_clarity + self.criteria_utility) / 3
+
+    def __str__(self):
+        return f"Note pour {self.article.title} (Moyenne : {self.average_score():.2f})"
