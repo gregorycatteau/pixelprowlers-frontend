@@ -100,7 +100,7 @@ function formatDate(dateStr: string) {
 <style scoped>
 @reference "@/assets/css/main.css";
 .blog-filter-container {
-  @apply bg-gray-900/95 text-white p-6 rounded-2xl border border-gray-800 shadow-xl space-y-6 min-w-[260px];
+  @apply bg-gray-900/95 text-white p-6 rounded-2xl border border-gray-200 shadow-xl space-y-6 min-w-[260px];
 }
 
 .blog-header {
@@ -108,7 +108,7 @@ function formatDate(dateStr: string) {
 }
 
 .blog-title {
-  @apply text-base font-bold leading-tight;
+  @apply text-base font-bold leading-tight text-white text-center max-w-3xl mx-auto leading-tight;
 }
 
 .subscribe-button {

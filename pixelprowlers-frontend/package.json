@@ -18,7 +18,8 @@
   },
   "dependencies": {
     "@hypernym/nuxt-gsap": "^2.4.3",
-    "@nuxt/eslint": "^1.4.1",
+    "@nuxt/eslint": "^1.2.0",
+    "@pinia/nuxt": "^0.11.2",
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.1.8",
     "@vueuse/core": "^13.3.0",
@@ -28,6 +29,7 @@
     "eslint": "^9.28.0",
     "gsap": "^3.13.0",
     "nuxt": "3.17.0",
+    "pinia": "^3.0.3",
     "tailwindcss": "^4.1.8",
     "vue": "^3.5.16",
     "vue-router": "^4.5.1"

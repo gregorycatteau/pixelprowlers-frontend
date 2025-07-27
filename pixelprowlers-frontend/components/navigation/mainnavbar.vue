@@ -29,7 +29,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import Icon from '@/components/ui/Icon.vue'
-import NavMenu from '~/components/navigation/NavMenu.vue'
+import NavMenu from '@/components/navigation/NavMenu.vue'
 
 const isOpen = ref(false)
 const toggleMenu = () => {
