@@ -1,0 +1,120 @@
+[
+    {
+        "operation": "restore",
+        "zone": "Z1",
+        "status": "success",
+        "timestamp": "20250801-224714",
+        "details": {
+            "restored_file": "Z1.json",
+            "manifest": "Z1__20250801-224714.json"
+        }
+    },
+    {
+        "operation": "restore_validation",
+        "zone": "Z1",
+        "status": "error",
+        "timestamp": "20250802-101021",
+        "details": {
+            "error": "validate_file() missing 1 required positional argument: 'schema_path'",
+            "file": "Z1.json"
+        }
+    },
+    {
+        "operation": "restore",
+        "zone": "Z1",
+        "status": "success",
+        "timestamp": "20250801-224714",
+        "details": {
+            "restored_file": "Z1.json",
+            "manifest": "Z1__20250801-224714.json"
+        }
+    },
+    {
+        "operation": "restore_validation",
+        "zone": "Z1",
+        "status": "error",
+        "timestamp": "20250802-101235",
+        "details": {
+            "error": "'str' object has no attribute 'name'",
+            "file": "Z1.json"
+        }
+    },
+    {
+        "operation": "restore",
+        "zone": "Z1",
+        "status": "success",
+        "timestamp": "20250801-224714",
+        "details": {
+            "restored_file": "Z1.json",
+            "manifest": "Z1__20250801-224714.json"
+        }
+    },
+    {
+        "operation": "restore_validation",
+        "zone": "Z1",
+        "status": "error",
+        "timestamp": "20250802-101348",
+        "details": {
+            "error": "'str' object has no attribute 'name'",
+            "file": "Z1.json"
+        }
+    },
+    {
+        "operation": "restore",
+        "zone": "Z1",
+        "status": "success",
+        "timestamp": "20250801-224714",
+        "details": {
+            "restored_file": "Z1.json",
+            "manifest": "Z1__20250801-224714.json"
+        }
+    },
+    {
+        "operation": "restore_validation",
+        "zone": "Z1",
+        "status": "warning",
+        "timestamp": "20250802-101755",
+        "details": {
+            "file": "Z1.json",
+            "issues": [
+                "\u274c Champs manquants dans Z1.json : title, description, version",
+                "\u26a0\ufe0f Cl\u00e9s manquantes vs sch\u00e9ma dans Z1.json : structure, schema_version, description",
+                "\u26a0\ufe0f Cl\u00e9s suppl\u00e9mentaires vs sch\u00e9ma dans Z1.json : zone_label, zone_id, updated_at, visibility, content, tags, usage_description, zone_code, retention_policy"
+            ]
+        }
+    },
+    {
+        "operation": "restore",
+        "zone": "Z1",
+        "status": "success",
+        "timestamp": "20250801-224714",
+        "details": {
+            "restored_file": "Z1.json",
+            "manifest": "Z1__20250801-224714.json"
+        }
+    },
+    {
+        "operation": "restore_validation",
+        "zone": "Z1",
+        "status": "warning",
+        "timestamp": "20250802-103333",
+        "details": {
+            "file": "Z1.json",
+            "issues": [
+                "\u274c Champs manquants dans Z1.json : title, description, version",
+                "\u26a0\ufe0f Cl\u00e9s manquantes vs sch\u00e9ma dans Z1.json : optional_fields, notes, schema_version, field_types, required_fields, description",
+                "\u26a0\ufe0f Cl\u00e9s suppl\u00e9mentaires vs sch\u00e9ma dans Z1.json : zone_label, retention_policy, updated_at, zone_id, visibility, usage_description, zone_code, content, tags"
+            ]
+        }
+    },
+    {
+        "operation": "restore",
+        "zone": "Z1",
+        "status": "success",
+        "timestamp": "20250801-224714",
+        "details": {
+            "restored_file": "Z1.json",
+            "manifest": "Z1__20250801-224714.json"
+        }
+    }
+]

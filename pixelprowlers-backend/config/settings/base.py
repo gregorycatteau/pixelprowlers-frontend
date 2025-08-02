@@ -23,12 +23,17 @@ INSTALLED_APPS = [
     'corsheaders',
     'ckeditor',
     'ckeditor_uploader',
+   
+    
     
 
     # Apps internes
     'designengine',
     'blog',
     'feedback',
+    'ai_assistants',
+    'jared_dashboard',
+    'overall_context',
 ]
 
 # Middleware
@@ -50,7 +55,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'jared_dashboard' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -58,6 +63,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'jared_dashboard.context_processors.jared_alert_banner',
             ],
         },
     },

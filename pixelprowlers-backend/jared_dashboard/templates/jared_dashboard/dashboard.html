@@ -1,0 +1,320 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+:root {
+  --background-dark: #0d0d0d;
+  --background-card: #141414;
+  --border-neon: #00ffcc;
+  --text-primary: #e0ffe7;
+  --text-secondary: #7dd3fc;
+  --text-alert: #ff4c4c;
+  --accent-purple: #8b5cf6;
+  --accent-green: #10b981;
+  --accent-blue: #2563eb;
+  --font-family: 'Fira Code', monospace;
+}
+
+body {
+  background-color: var(--background-dark);
+  font-family: var(--font-family);
+  color: var(--text-primary);
+}
+
+.cockpit-container {
+  padding: 2rem;
+  max-width: 1600px;
+  margin: auto;
+}
+
+.dashboard-title {
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: var(--accent-green);
+  margin-bottom: 2rem;
+  border-left: 6px solid var(--border-neon);
+  padding-left: 1rem;
+}
+
+.dashboard-layout {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+}
+
+.aside-widgets {
+  flex: 0 0 35%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.main-chat {
+  flex: 1;
+}
+
+.widget-card {
+  background-color: var(--background-card);
+  border: 2px solid var(--border-neon);
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 0 8px var(--border-neon);
+  transition: transform 0.2s ease;
+}
+
+.widget-card:hover {
+  transform: scale(1.01);
+  box-shadow: 0 0 16px var(--border-neon);
+}
+
+.alert-card {
+  border-color: var(--text-alert);
+  box-shadow: 0 0 8px var(--text-alert);
+}
+
+.widget-header {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-neon);
+  padding-bottom: 0.5rem;
+}
+
+.widget-body {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.8rem;
+  border-bottom: 1px solid #333;
+  text-align: left;
+}
+
+.data-table th {
+  background-color: rgba(255, 255, 255, 0.03);
+  color: var(--accent-blue);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.data-table td {
+  font-size: 0.95rem;
+}
+
+.data-table tr:hover td {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Conversation */
+.chat-box {
+  height: 700px;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--background-card);
+  border: 2px solid var(--accent-purple);
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 0 12px var(--accent-purple);
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-neon);
+  margin-bottom: 1rem;
+}
+
+.chat-message {
+  margin-bottom: 0.75rem;
+}
+
+.chat-message.user {
+  color: var(--accent-green);
+}
+
+.chat-message.agent,
+.chat-message.jared {
+  color: var(--accent-blue);
+}
+
+.chat-input {
+  display: flex;
+  gap: 1rem;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 0.75rem;
+  background-color: #1f1f1f;
+  border: 1px solid var(--border-neon);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-family: var(--font-family);
+}
+
+.chat-input button {
+  background-color: var(--accent-purple);
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.chat-input button:hover {
+  background-color: #6d28d9;
+}
+
+@media screen and (max-width: 1024px) {
+  .dashboard-layout {
+    flex-direction: column;
+  }
+}
+</style>
+
+<div class="cockpit-container">
+  <div class="dashboard-title">🧠 Jared | Tableau de Bord Stratégique</div>
+
+  <div class="dashboard-layout">
+    <!-- ASIDE GAUCHE -->
+    <div class="aside-widgets">
+
+      <div class="widget-card">
+        <div class="widget-header">📜 Manifeste actuel</div>
+        <div class="widget-body">
+          {% if current_manifesto %}
+            <div style="margin-bottom: 0.5rem;">
+              <strong>Version :</strong> {{ current_manifesto.version }}
+              {% if current_manifesto.current %}
+                <span style="color: var(--accent-green); font-weight: bold;">(actif)</span>
+              {% endif %}
+            </div>
+            <div style="font-size: 0.85rem; line-height: 1.4; white-space: pre-wrap;">
+              {{ current_manifesto.content|truncatechars:600 }}
+            </div>
+          {% else %}
+            <p>Aucun manifeste actif pour le moment.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="widget-card">
+        <div class="widget-header">📜 Logs récents</div>
+        <div class="widget-body">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Agent</th>
+                <th>Message</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for log in logs %}
+              <tr>
+                <td>{{ log.timestamp }}</td>
+                <td>{{ log.agent_name }}</td>
+                <td>{{ log.message }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="3">Aucun log disponible.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="widget-card">
+        <div class="widget-header">🛠️ Tâches en cours</div>
+        <div class="widget-body">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Titre</th>
+                <th>Status</th>
+                <th>Échéance</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for task in tasks %}
+              <tr>
+                <td>{{ task.title }}</td>
+                <td>{{ task.status }}</td>
+                <td>{{ task.due_date }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="3">Aucune tâche assignée.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="widget-card alert-card">
+        <div class="widget-header">🚨 Alertes à venir</div>
+        <div class="widget-body">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Titre</th>
+                <th>Échéance</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for alert in alerts %}
+              <tr>
+                <td>{{ alert.title }}</td>
+                <td>{{ alert.due_date }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="2">Aucune alerte détectée.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODULE CONVERSATIONNEL CENTRAL -->
+    <div class="main-chat">
+      <div class="chat-box">
+        <div class="widget-header">💬 Conversation avec Jared</div>
+        <div class="chat-messages">
+          {% for msg in conversations %}
+          <div class="chat-message {{ msg.sender }}">
+            <strong>{{ msg.sender|capfirst }} :</strong> {{ msg.content }}
+            <div style="font-size: 0.75rem; opacity: 0.5;">{{ msg.timestamp }}</div>
+          </div>
+          {% empty %}
+          <div class="chat-message">Aucun échange encore enregistré.</div>
+          {% endfor %}
+        </div>
+        <form method="post" class="chat-input">
+          {% csrf_token %}
+          <input type="text" name="message" placeholder="Tape ton message à Jared..." required />
+          <button type="submit">Envoyer</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.onload = function () {
+    const chat = document.querySelector(".chat-messages");
+    if (chat) {
+      chat.scrollTop = chat.scrollHeight;
+    }
+  };
+</script>
+{% endblock %}

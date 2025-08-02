@@ -1,0 +1,64 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+<h1>🧠 Jared – Strategic Command Dashboard</h1>
+
+<h2>🚨 Alertes critiques en cours</h2>
+{% if alerts %}
+  <ul>
+    {% for a in alerts %}
+      <li><strong>{{ a.reason|truncatechars:120 }}</strong>
+          {% if a.recommendation %}<br>👉 {{ a.recommendation }}{% endif %}
+          — {{ a.created_at|date:"Y‑m‑d H:i" }}</li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>✅ Aucune alerte active.</p>
+{% endif %}
+
+<hr>
+
+<h2>🗂️ Dernières décisions</h2>
+<ul>
+  {% for d in last_decisions %}
+    <li><strong>{{ d.decision|truncatechars:80 }}</strong>
+        <br><em>{{ d.context|truncatechars:60 }}</em> — {{ d.timestamp|date:"Y‑m‑d" }}</li>
+  {% empty %}<li>Aucune décision enregistrée.</li>{% endfor %}
+</ul>
+
+<h2>🔥 Tâches critiques</h2>
+<ul>
+  {% for t in critical_tasks %}
+    <li>{{ t.title }} — échéance {{ t.due_date }} ({{ t.assigned_to }})</li>
+  {% empty %}<li>Aucune tâche critique.</li>{% endfor %}
+</ul>
+
+<h2>🛣️ Mises à jour roadmaps</h2>
+<ul>
+  {% for r in latest_roadmaps %}
+    <li><strong>{{ r.agent_or_theme }}</strong> — {{ r.update|truncatechars:100 }}</li>
+  {% empty %}<li>Aucune mise à jour récente.</li>{% endfor %}
+</ul>
+
+<h2>📊 KPI récents</h2>
+<ul>
+  {% for k in recent_kpis %}
+    <li>{{ k.generated_at|date:"Y‑m‑d" }} — {{ k.summary|truncatechars:120 }}</li>
+  {% empty %}<li>Aucun rapport KPI.</li>{% endfor %}
+</ul>
+
+<h2>📖 Revue historique</h2>
+<ul>
+  {% for h in history_reviews %}
+    <li><strong>{{ h.focus|default:"Global" }}</strong> — {{ h.findings|truncatechars:120 }}</li>
+  {% empty %}<li>Pas de revue récente.</li>{% endfor %}
+</ul>
+
+<h2>🔐 Notes privées (récentes)</h2>
+<ul>
+  {% for n in private_notes %}
+    <li><strong>{{ n.title }}</strong> — {{ n.content|truncatechars:120 }}</li>
+  {% empty %}<li>Aucune note.</li>{% endfor %}
+</ul>
+{% endblock %}

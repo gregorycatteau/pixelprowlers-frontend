@@ -16,6 +16,11 @@ urlpatterns = [
 
     # API feedback (notations + commentaires)
     path('api/feedback/', include('feedback.urls')),
+
+    # API des assistants IA
+     path('ai/', include('ai_assistants.urls')),  # accessible via /ai/ask-dan/
+     path("jared/", include("jared_dashboard.urls")),
+    
 ]
 
 # En dev, sert les médias (uploads CKEditor, avatars…)

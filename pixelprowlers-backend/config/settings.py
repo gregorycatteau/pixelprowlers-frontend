@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'designengine.apps.DesignengineConfig',
     'blog.apps.BlogConfig',
+    
 ]
 
 ]
@@ -71,6 +72,9 @@ TEMPLATES = [
         },
     },
 ]
+
+
+
 
 WSGI_APPLICATION = 'config.wsgi.application'
 

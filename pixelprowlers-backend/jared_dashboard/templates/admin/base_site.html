@@ -1,0 +1,116 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <style>
+    :root {
+      --background-dark: #0b0f10;
+      --background-card: #14191a;
+      --text-primary: #e0ffe7;
+      --text-secondary: #7dd3fc;
+      --text-alert: #ff4c4c;
+      --accent-purple: #a855f7;
+      --accent-green: #00ffcc;
+      --neon-border: 1px solid var(--accent-green);
+    }
+
+    body {
+      background-color: var(--background-dark);
+      color: var(--text-primary);
+    }
+
+    #header {
+      background-color: var(--background-card);
+      border-bottom: var(--neon-border);
+      padding: 1rem;
+    }
+
+    .admin-branding {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: var(--text-secondary);
+      animation: glitch 1.5s infinite;
+    }
+
+    .admin-logo {
+      width: 36px;
+      height: 36px;
+      filter: drop-shadow(0 0 3px var(--accent-green));
+    }
+
+    @keyframes glitch {
+      0% { text-shadow: 1px 1px var(--accent-purple); }
+      20% { text-shadow: -1px -1px var(--accent-green); }
+      40% { text-shadow: 2px -1px var(--accent-purple); }
+      60% { text-shadow: -2px 2px var(--accent-green); }
+      80% { text-shadow: 0px 0px var(--accent-purple); }
+      100% { text-shadow: 1px -1px var(--accent-green); }
+    }
+
+    .cockpit-link-wrapper {
+      margin-top: 1rem;
+      padding: 0.5rem;
+      text-align: right;
+    }
+
+    .cockpit-link {
+      background-color: var(--background-card);
+      color: var(--accent-green);
+      padding: 0.5rem 1rem;
+      border: var(--neon-border);
+      border-radius: 6px;
+      font-weight: bold;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .cockpit-link:hover {
+      background-color: var(--accent-green);
+      color: var(--background-dark);
+      text-shadow: 0 0 5px var(--accent-purple);
+    }
+
+    .jared-alert {
+      background-color: var(--text-alert);
+      color: white;
+      padding: 12px 18px;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      font-weight: bold;
+      border: 2px dashed #fff;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 76, 76, 0.5); }
+      70% { box-shadow: 0 0 0 10px rgba(255, 76, 76, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 76, 76, 0); }
+    }
+  </style>
+{% endblock %}
+
+{% block branding %}
+  <h1 id="site-name" class="admin-branding">
+    <img src="{% static 'jared_dashboard/static/photo_logo.png' %}" alt="PixelProwlers" class="admin-logo" />
+    <span>PixelProwlers Admin</span>
+  </h1>
+{% endblock %}
+
+{% block nav-global %}
+  {{ block.super }}
+  <div class="cockpit-link-wrapper">
+    <a href="{% url 'jared_dashboard' %}" class="cockpit-link">🧠 Jared Cockpit</a>
+  </div>
+{% endblock %}
+
+{% block content %}
+  {% if jared_alert_banner %}
+    <div class="jared-alert">
+      ⚠️ {{ jared_alert_banner }}
+    </div>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}

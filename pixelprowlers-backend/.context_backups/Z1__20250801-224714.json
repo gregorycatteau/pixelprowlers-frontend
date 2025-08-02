@@ -1,0 +1,9 @@
+{
+  "zone": "Z1",
+  "original_file": "Z1.json",
+  "timestamp_utc": "20250801-224714",
+  "encrypted_file": "Z1__20250801-224714.bin",
+  "hash_sha256": "2795d41017172de191f282ef4efae2b7eb9515e21b615f8aa42dc1318886614c",
+  "backup_agent": "backup_encryptor.py",
+  "context_source": "cdn_zones/"
+}
